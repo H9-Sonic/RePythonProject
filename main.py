@@ -1,6 +1,7 @@
 from os import path
 from pydub import AudioSegment
 from pydub.playback import play
+import ffmpeg
 
 m4a_file = "clap2.m4a"
 wav_file = "clap2.wav"
