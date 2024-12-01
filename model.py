@@ -64,11 +64,11 @@ class Model:
 
             # Adjust frequency bands to capture different characteristics
             if frequency_band == "low":
-                freq_mask = (freqs >= 20) & (freqs <= 150)
+                freq_mask = (freqs >= 60) & (freqs <= 200)
             elif frequency_band == "mid":
-                freq_mask = (freqs > 150) & (freqs <= 2000)
+                freq_mask = (freqs > 250) & (freqs <= 1500)
             else:  # "high"
-                freq_mask = (freqs > 2000)
+                freq_mask = (freqs > 4000)
 
             Sxx_filtered = Sxx[freq_mask, :]
             rt60_values = np.mean(Sxx_filtered, axis=0)
@@ -92,18 +92,18 @@ class Model:
             S_db = librosa.amplitude_to_db(np.abs(S), ref=np.max)
             freqs, times, Sxx = signal.spectrogram(self.audio, self.sampling_rate)
 
-            # Low frequencies (20-150 Hz)
-            low_mask = (freqs >= 20) & (freqs <= 150)
+            # Low frequencies (60-200 Hz)
+            low_mask = (freqs >= 60) & (freqs <= 200)
             Sxx_low = Sxx[low_mask, :]
             rt60_low = np.mean(Sxx_low, axis=0)
 
-            # Mid frequencies (150-2000 Hz)
-            mid_mask = (freqs > 150) & (freqs <= 2000)
+            # Mid frequencies (250-1500 Hz)
+            mid_mask = (freqs > 250) & (freqs <= 1500)
             Sxx_mid = Sxx[mid_mask, :]
             rt60_mid = np.mean(Sxx_mid, axis=0)
 
-            # High frequencies (> 2000 Hz)
-            high_mask = (freqs > 2000)
+            # High frequencies (> 4000 Hz)
+            high_mask = (freqs > 4000)
             Sxx_high = Sxx[high_mask, :]
             rt60_high = np.mean(Sxx_high, axis=0)
 
