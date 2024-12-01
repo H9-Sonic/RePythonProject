@@ -5,6 +5,11 @@ import wave
 import numpy as np
 import matplotlib.pyplot as plt
 
+from controller import Controller
+from model import Model
+from view import View
+
+"""
 # Convert m4a to wav and set mono
 m4a_file = "clap2.m4a"
 wav_file = "clap2.wav"
@@ -25,6 +30,9 @@ print(f"Channel count after conversion to mono: {channel_count}")
 
 
 # Function to display the waveform
+"""
+"""
+
 def display_waveform(file_path):
     with wave.open(file_path, 'rb') as wav_file:
         # Get parameters
@@ -49,6 +57,12 @@ def display_waveform(file_path):
         plt.legend()
         plt.show()
 
+"""
+
+model = Model()
+view = View()
+controller = Controller(model, view)
+view.mainloop()
 
 # Display the waveform of the exported mono wav file
-display_waveform(wav_file)
+# display_waveform(wav_file)
