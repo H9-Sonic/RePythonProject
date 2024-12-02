@@ -5,19 +5,43 @@ import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 import scipy.signal as signal
+from matplotlib.figure import Figure
+from pydub import AudioSegment
+from scipy.signal import welch
+from scipy.io import wavfile
+
+
 
 class Model:
     def __init__(self):
         self.audio = None
         self.sampling_rate = None
 
+    def convert_audio(self):
+        #convert audio from .m4a to .wav
+        m4a_file = "clap2.m4a"
+        wav_file = "clap2.wav"
+
+        #converts if there is a file present
+        sound = AudioSegment.from_file(m4a_file, format='m4a')
+        sound.export(wav_file, format="wav")
+        print("Audio converted to .wav")
+        return wav_file
+
+
     def load_audio(self):
         # Load the audio using librosa
-        self.audio, self.sampling_rate = librosa.load(self.file_path, sr=None, mono=False)
+        try:
+            self.audio, self.sampling_rate = librosa.load(self.file_path, sr=None, mono=False)
+        except Exception as e:
+            print(f"Error loading audio; {e}")
 
     def convert_to_mono(self):
         if self.audio.ndim > 1:  # If the audio has more than one channel
             self.audio = librosa.to_mono(self.audio)
+            print(f"Audio converted to mono")
+        else:
+            print("Audio is already mono")
 
     def analyze_reverb(self):
         # Calculate RT60 using the Schroeder integration method
@@ -33,27 +57,45 @@ class Model:
             return rt60_time
         return None
 
+    def dom_freq(self):
+        sample, data = wavfile.read("clap2.wav")
+        frequencies, power = welch(data, sample, nperseg=4096)
+        dominant_freq = frequencies[np.argmax(power)]
+        #print(f'Dominant frequency: {round(dominant_freq)}Hz')
+        return dominant_freq
+
+    def file_length(self):
+        #gives length of audio file in seconds
+        audio = AudioSegment.from_wav(self.convert_audio())
+        file_length = len(audio) / 1000
+
+        #print(f'The audio is {file_length} seconds long')
+        return file_length
+
     def plot_waveform(self):
         if self.audio is not None:
-            plt.figure()
             librosa.display.waveshow(self.audio, sr=self.sampling_rate)
-            plt.title('Waveform')
-            plt.xlabel('Time (s)')
-            plt.ylabel('Amplitude')
-            plt.show()
+
+            fig = Figure(figsize=(5, 4), dpi=100)
+            ax = fig.add_subplot(111)
+            librosa.display.waveshow(self.audio, sr=self.sampling_rate, ax=ax)
+            ax.set_title('Waveform')
+            ax.set_xlabel('Time (s)')
+            ax.set_ylabel('Amplitude')
+            return fig
 
     def plot_spectrogram(self):
         if self.audio is not None:
             # Generate the spectrogram
             S = librosa.stft(self.audio)
             S_db = librosa.amplitude_to_db(np.abs(S), ref=np.max)
-            plt.figure()
-            librosa.display.specshow(S_db, sr=self.sampling_rate, x_axis='time', y_axis='hz')
-            plt.colorbar(format='%+2.0f dB')
-            plt.title('Spectrogram')
-            plt.xlabel('Time (s)')
-            plt.ylabel('Frequency (Hz)')
-            plt.show()
+            fig = Figure(figsize=(5, 4), dpi=100)
+            ax = fig.add_subplot(111)
+            librosa.display.specshow(S_db, sr=self.sampling_rate, x_axis='time', y_axis='hz', ax=ax)
+            ax.set_title('Spectrogram')
+            ax.set_xlabel('Time (s)')
+            ax.set_ylabel('Frequency (Hz)')
+            return fig
 
     def plot_rt60_graph(self, frequency_band):
         if self.audio is not None and frequency_band in ["low", "mid", "high"]:
@@ -72,18 +114,21 @@ class Model:
 
             Sxx_filtered = Sxx[freq_mask, :]
             rt60_values = np.mean(Sxx_filtered, axis=0)
-            times = np.linspace(0, 9.0, len(rt60_values))
+            times = np.linspace(0, len(rt60_values)/self.sampling_rate, num=len(rt60_values))
 
             colors = {"low": 'orange', "mid": 'purple', "high": 'blue'}
-            plt.figure()
-            plt.plot(times, rt60_values, color=colors[frequency_band], linewidth=2)
-            plt.title(f'{frequency_band.capitalize()} RT60 Graph')
-            plt.xlabel('Time (s)')
-            plt.ylabel('Power (dB)')
-            #plt.xlim(0.0, 9.0)
-            #plt.ylim(-40.0, 40.0)
-            plt.grid(True)
-            plt.show()
+            fig = Figure(figsize=(5, 4), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(times, rt60_values, color=colors[frequency_band], linewidth=2)
+            ax.set_title(f'{frequency_band.capitalize()} RT60 graph')
+            ax.set_xlabel('Time (s)')
+            ax.set_ylabel('Power (dB)')
+            ax.grid(True)
+            return fig
+        else:
+            print("Audio not loaded")
+            return None
+
 
     def plot_combined_rt60_graph(self):
         if self.audio is not None:
@@ -109,15 +154,13 @@ class Model:
 
             times = np.linspace(0, 9.0, len(rt60_low))
 
-            plt.figure()
-            plt.plot(times, rt60_low, color='orange', label='Low Frequency')
-            plt.plot(times, rt60_mid, color='purple', label='Mid Frequency')
-            plt.plot(times, rt60_high, color='blue', label='High Frequency')
-            plt.title('Combined RT60 Graph')
-            plt.xlabel('Time (s)')
-            plt.ylabel('Power (dB)')
-            #plt.xlim(0.0, 9.0)
-            #plt.ylim(-40.0, 40.0)
-            plt.legend()
-            plt.grid(True)
-            plt.show()
+            fig = Figure(figsize=(5, 4), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(times, rt60_low, color='orange', label='Low Frequency')
+            ax.plot(times, rt60_mid, color='blue', label='Mid Frequency')
+            ax.plot(times, rt60_high, color='purple', label='High Frequency')
+            ax.set_title(f'Combined RT60 graph')
+            ax.set_xlabel('Time (s)')
+            ax.set_ylabel('Power (dB)')
+            ax.grid(True)
+            return fig
