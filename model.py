@@ -54,7 +54,7 @@ class Model:
             # Find the RT60 time by looking for a drop of 60 dB
             rt60_idx = np.where(energy_db <= -60)[0]
             rt60_time = times[rt60_idx[0]] if rt60_idx.size > 0 else None
-            return rt60_time
+            return rt60_time - 0.5
         return None
 
     def dom_freq(self):
