@@ -14,22 +14,37 @@ class Controller:
         self.model.file_path = file_path
         self.model.load_audio()
         self.model.convert_to_mono()
+        print(f"File loaded and converted to mono: {file_path}")
         messagebox.showinfo("File Loaded", f"Loaded file: {file_path}\nConverted to mono if multi-channel.")
 
     def analyze_reverb(self):
-        return self.model.analyze_reverb()
+        RT60 = self.model.analyze_reverb()
+        dom_frequency = self.model.dom_freq()
+        file_length = self.model.file_length()
+        return RT60, dom_frequency, file_length
+
+    #def dom_freq(self):
+    #    return self.model.dom_freq()
 
     def plot_waveform(self):
-        self.model.plot_waveform()
+        fig = self.model.plot_waveform()
+        return fig
 
     def plot_spectrogram(self):
-        self.model.plot_spectrogram()
+        fig = self.model.plot_spectrogram()
+        return fig
 
     def plot_rt60(self):
-        self.model.plot_rt60_graph(self.current_rt60_band)
+        fig = self.model.plot_rt60_graph(self.current_rt60_band)
+        if fig:
+            print("RT60 graph plotted successfully")
+        else:
+            print("RT60 graph plot failed")
         # Cycle through the RT60 bands for the next button press
         current_index = self.rt60_bands.index(self.current_rt60_band)
         self.current_rt60_band = self.rt60_bands[(current_index + 1) % len(self.rt60_bands)]
+        return fig
 
     def plot_combined_rt60(self):
-        self.model.plot_combined_rt60_graph()
+        fig = self.model.plot_combined_rt60_graph()
+        return fig
