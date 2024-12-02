@@ -1,3 +1,4 @@
+"""
 import tkinter as tk
 from tkinter import ttk
 
@@ -32,17 +33,18 @@ class GUI(tk.Frame):
 
     title = tk.Label(root, text='Frequency Viewer', font=('Arial', 16))
 
-    """
+
     class GUI(ttk.Frame):
         def __init__(self, parent):
             super().__init__(parent)
-    """
-    """
+
+
     low_label = tk.Button(root, text="Low")
     Med_label = tk.Button(root, text="Medium")
     High_label = tk.Button(root, text="High")
 
-    """
+
 
 app = GUI(master=root)
 app.mainloop()
+"""
