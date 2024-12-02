@@ -1,1 +1,6 @@
 #install pydub and ffmpeg for audio manipulation
+numpy~=2.0.2
+matplotlib~=3.9.3
+pydub~=0.25.1
+librosa~=0.10.2.post1
+scipy~=1.14.1
